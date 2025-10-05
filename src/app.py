@@ -8,7 +8,11 @@ def divide(a, b):
         raise ValueError("Tidak boleh bagi nol")
     return a / b
 
-# BUG: penggunaan shell=True berbahaya
-def run_command(cmd):
-    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    return result.stdout
+def run_command_safe(cmd):
+    args = shlex.split(cmd) if isinstance(cmd, str) else cmd
+    allowed = {'echo', 'ls', 'date'}
+    if not args or args[0] not in allowed:
+        raise ValueError("Perintah tidak diizinkan")
+
+    result = subprocess.run(args, capture_output=True, text=True)
+    return result.stdout.strip()

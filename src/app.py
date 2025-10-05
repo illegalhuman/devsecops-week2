@@ -1,4 +1,5 @@
-import subprocess
+import subprocess #nosec
+import shlex
 
 def add(a, b):
     return a + b
@@ -8,6 +9,15 @@ def divide(a, b):
         raise ValueError("Tidak boleh bagi nol")
     return a / b
 
-def run_command(cmd):
-    result = subprocess.run(cmd, capture_output=True, text=True)
+def run_command_safe(cmd):
+    if isinstance(cmd, str):
+        args = shlex.split(cmd)
+    else:
+        args = cmd  # diasumsikan list jika bukan string
+
+    allowed_bins = {'echo', 'ls', 'date'}
+    if args and args[0] not in allowed_bins:
+        raise ValueError("Perintah tidak diizinkan")
+
+    result = subprocess.run(args, capture_output=True, text=True) #nosec
     return result.stdout
